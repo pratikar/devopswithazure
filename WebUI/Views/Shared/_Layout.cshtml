@@ -1,0 +1,99 @@
+﻿@using System.Threading
+@using System.Web.Optimization
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+        @ViewBag.Title - ProDinner ASP.net MVC Awesome Demo Application
+    </title>
+    <link rel="shortcut icon" href="@Url.Content("~/favicon.ico")" type="image/x-icon" />
+    @{
+        var settings = SettingsController.ReadSettings(HttpContext.Current.Request);
+    }
+    
+    <link href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/themes/" + settings.Theme + "/AwesomeMvc.css")?v=103" rel="stylesheet" type="text/css" id="aweStyle" />
+    <link href="@Url.Content("~/Content/themes/" + settings.Theme + "/awem.css")?v=103" rel="stylesheet" type="text/css" id="modsStyle" />
+    <link href="@Url.Content("~/Content/Common.css")?v=103" rel="stylesheet" type="text/css" />
+    
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+    @*jquery needs to be at the top*@
+
+    <script>
+        var slinks = [
+        { k: "@Url.Action("Index", "Chef")", c: "@Mui.Chef" },
+        { k: "@Url.Action("Index", "Country")", c: "@Mui.Country" },
+        { k: "@Url.Action("Index", "Dinner")", c: "Dinners" },
+        { k: "@Url.Action("Index", "Feedback")", c: "Feedback" }
+        ];
+    </script>
+</head>
+    <body class="@settings.Theme">
+    <noscript>
+        <div id="nos">
+            this site works best with javascript allowed
+        </div>
+    </noscript>
+        @(Html.Awe().InitPopup().Name("about").Url(Url.Action("About", "Home")).Fullscreen(true).Modal().LoadOnce())
+    <div id="header">
+        <div class="cont">
+            <ul class="menu">
+                <li><a id='logo' href="@Url.Content("~")"><i></i></a></li>
+                <li class="optional">@Html.ActionLink(Mui.Home, "Index", "Home")</li>
+                <li>@Html.ActionLink(Mui.Meals, "Index", "Meal")</li>
+                @if (WebUtils.IsUserAdmin())
+                {
+                    <li>@Html.ActionLink("Users", "Index", "User")</li>
+                }
+                <li>@(Html.Awe().AjaxRadioList("ddlStuff")
+                          .DataFunc("utils.getItems(slinks)")
+                          .MenuDropdown(o => o.Caption(Mui.Stuff)))</li>
+                <li><a href="#" onclick="awe.open('about')">@Mui.About</a></li>
+            </ul>
+            <ul class="menu" style="float: right;">
+                <li>@Html.Partial("login")</li>
+            </ul>
+        </div>
+    </div>
+        @Html.Awe().InitPopup().Name("settings").Url(Url.Action("Index","Settings")).LoadOnce().Width(100).Mod(o => o.Toggle())
+        <div id="main" class="cont">
+            <div class="awe-il settings">
+                <button type="button" class="awe-btn btnSettings" onclick="awe.open('settings', {}, event)"><span class="ico-settings">&nbsp;</span></button>
+            </div>
+
+            @RenderBody()
+        </div>
+        <div id="footer">
+            <div class="cont">
+                <span><a href='http://prodinner.codeplex.com'>project home: http://prodinner.codeplex.com</a></span>
+            </div>
+        </div>
+        @Html.Partial("doghelp")
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.1/js.cookie.min.js" type="text/javascript"></script>
+        <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.14.0/jquery.validate.min.js" type="text/javascript"></script>
+        @Scripts.Render("~/bundle/Scripts/js")
+
+        <script type="text/javascript">
+            var root = '@(Url.Content("~"))';
+            var isMobileOrTablet = '@(ClientSideUtils.IsMobileOrTablet())' == "True";
+            var dateFormat = '@(AweUtil.ConvertTojQueryDateFormat(Thread.CurrentThread.CurrentCulture.DateTimeFormat.ShortDatePattern))';
+            var decimalSep = '@Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator';
+            awem.clientDict = @Html.Raw(Json.Encode(ClientSideUtils.GetClientDict()));
+            awem.isMobileOrTablet = function () { return isMobileOrTablet; };
+
+            utils.init(dateFormat, isMobileOrTablet, decimalSep);
+            awe.gmd = [awem.gridLoading, awem.gridPageInfo];// set global grid mods
+
+            var controller = '@(ViewContext.RouteData.Values["Controller"].ToString().ToLower())';
+            var action = '@(ViewContext.RouteData.Values["Action"].ToString().ToLower())';
+            $(function () {
+                documentReady(root, controller, action);
+            });
+        </script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/json2/20140204/json2.min.js" type="text/javascript" async></script>
+        <script type="text/javascript" src="//code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
+        <script src="http://ajax.aspnetcdn.com/ajax/mvc/5.1/jquery.validate.unobtrusive.min.js" type="text/javascript"></script>
+    </body>
+</html>
